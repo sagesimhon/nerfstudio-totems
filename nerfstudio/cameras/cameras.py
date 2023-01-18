@@ -772,7 +772,7 @@ class Cameras(TensorDataclass):
         camera_indices = camera_indices[valid_idx_1][valid_idx_2][valid_idx_3][indices_remaining]
         pixel_area = pixel_area[valid_idx_1][valid_idx_2][valid_idx_3][indices_remaining]
 
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         return RayBundle(
             origins=totem_rays_o,
             directions=totem_rays_d,

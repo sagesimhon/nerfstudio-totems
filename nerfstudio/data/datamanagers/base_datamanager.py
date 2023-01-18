@@ -428,7 +428,7 @@ class VanillaDataManager(DataManager):  # pylint: disable=abstract-method
         assert batch['mask'].shape[0] == self.config.train_num_rays_per_batch
         assert batch['indices'].shape[0] == self.config.train_num_rays_per_batch
 
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
 
         return ray_bundle, batch
 
