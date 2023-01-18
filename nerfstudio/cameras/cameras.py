@@ -32,6 +32,33 @@ from nerfstudio.cameras import camera_utils
 from nerfstudio.cameras.rays import RayBundle
 from nerfstudio.utils.tensor_dataclass import TensorDataclass
 
+###SAGE_CUSTOM totem helpers imports + hardcoding
+"""
+Totem helpers
+"""
+from nerfstudio.totem_utils.totem_helpers import cam_rays_to_totem_rays_numpy
+# from nerfstudio.totem_utils.run import config_parser
+import numpy as np
+"""
+Totem Hardcoding (for now) 
+"""
+# parser = config_parser()
+# args = parser.parse_args()
+totem_radius = 0.1 #CAVEAT: taken from default config file in totems for exp color-patch_JT8A8283_000_initial-pose
+near = 2.0 #CAVEAT: taken from default config file in totems for exp color-patch_JT8A8283_000_initial-pose
+
+H = 3840
+W = 5760
+K = np.load('nerfstudio/totem_utils/calib.npy', allow_pickle=True).item()['mtx']
+init_totem_pos = np.array([[-0.32813347,  0.13539607,  0.64053712],
+       [-0.11777631,  0.13717576,  0.6560064 ],
+       [ 0.10156402,  0.12432589,  0.62927161],
+       [ 0.32990276,  0.11328246,  0.61855619]])
+"""
+Debugging Helpers
+"""
+import matplotlib.pyplot as plt
+import pylab
 
 class CameraType(Enum):
     """Supported camera types."""
@@ -106,6 +133,7 @@ class Cameras(TensorDataclass):
         ] = CameraType.PERSPECTIVE,
         times: Optional[TensorType["num_cameras"]] = None,
     ):
+        # import pdb; pdb.set_trace()
         """Initializes the Cameras object.
 
         Note on Input Tensor Dimensions: All of these tensors have items of dimensions TensorType[3, 4]
@@ -355,6 +383,8 @@ class Cameras(TensorDataclass):
         Returns:
             Rays for the given camera indices and coords.
         """
+
+        # import pdb;pdb.set_trace()
         # Check the argument types to make sure they're valid and all shaped correctly
         assert isinstance(camera_indices, (torch.Tensor, int)), "camera_indices must be a tensor or int"
         assert coords is None or isinstance(coords, torch.Tensor), "coords must be a tensor or None"
@@ -417,6 +447,11 @@ class Cameras(TensorDataclass):
             index_dim = camera_indices.shape[-1]
             index = camera_indices.reshape(-1, index_dim)[0]
             coords: torch.Tensor = cameras.get_image_coords(index=tuple(index))  # (h, w, 2)
+
+            #SAGE_CUSTOM#
+            ### TODO: Pass filter on image coords to only take the ones that inside totem mask
+            # print("In cameras. ##: coords: ", coords.shape, coords)
+
             coords = coords.reshape(coords.shape[:2] + (1,) * len(camera_indices.shape[:-1]) + (2,))  # (h, w, 1..., 2)
             coords = coords.expand(coords.shape[:2] + camera_indices.shape[:-1] + (2,))  # (h, w, num_rays, 2)
             camera_opt_to_camera = (  # (h, w, num_rays, 3, 4) or None
@@ -429,6 +464,7 @@ class Cameras(TensorDataclass):
                 if distortion_params_delta is not None
                 else None
             )
+        #SAGE_CUSTOM how to mask coords if "else"?
 
         # If camera indices was an int or coords was none, we need to broadcast our indices along batch dims
         camera_indices = camera_indices.broadcast_to(coords.shape[:-1] + (len(cameras.shape),)).to(torch.long)
@@ -453,6 +489,9 @@ class Cameras(TensorDataclass):
         # TODO: We should have to squeeze the last dimension here if we started with zero batch dims, but never have to,
         # so there might be a rogue squeeze happening somewhere, and this may cause some unintended behaviour
         # that we haven't caught yet with tests
+        # import pdb;
+        #pdb.set_trace()
+
         return raybundle
 
     # pylint: disable=too-many-statements
@@ -533,6 +572,17 @@ class Cameras(TensorDataclass):
         Returns:
             Rays for the given camera indices and coords. RayBundle.shape == num_rays
         """
+        ###CUSTOM_SAGE debugging
+        pylab.ion()
+        pylab.plot(coords.cpu()[:, 0], coords.cpu()[:, 1])
+        pylab.draw()
+        pylab.show()
+        plt.plot(coords.cpu()[:, 0], coords.cpu()[:, 1])
+        # plt.savefig()###SAGE_CUSTOM TODO
+
+        ###
+        # import pdb;
+        # pdb.set_trace()
         # Make sure we're on the right devices
         camera_indices = camera_indices.to(self.device)
         coords = coords.to(self.device)
@@ -621,7 +671,7 @@ class Cameras(TensorDataclass):
             mask = torch.stack([mask, mask, mask], dim=0)
             directions_stack[..., 0][mask] = torch.masked_select(coord_stack[..., 0], mask).float()
             directions_stack[..., 1][mask] = torch.masked_select(coord_stack[..., 1], mask).float()
-            directions_stack[..., 2][mask] = -1.0
+            directions_stack[..., 2][mask] = 1.0 ###SAGE_CUSTOM CAVEAT Manually changed from -1.0 to +1.0
 
         if CameraType.FISHEYE.value in cam_types:
             mask = (self.camera_type[true_indices] == CameraType.FISHEYE.value).squeeze(-1)  # (num_rays)
@@ -663,6 +713,7 @@ class Cameras(TensorDataclass):
         rotation = c2w[..., :3, :3]  # (..., 3, 3)
         assert rotation.shape == num_rays_shape + (3, 3)
 
+        ###SAGE_CUSTOM note normalization of directions
         directions_stack = torch.sum(
             directions_stack[..., None, :] * rotation, dim=-1
         )  # (..., 1, 3) * (..., 3, 3) -> (..., 3)
@@ -675,6 +726,7 @@ class Cameras(TensorDataclass):
         directions = directions_stack[0]
         assert directions.shape == num_rays_shape + (3,)
 
+        ###SAGE_CUSTOM just for MIPNerf
         # norms of the vector going between adjacent coords, giving us dx and dy per output ray
         dx = torch.sqrt(torch.sum((directions - directions_stack[1]) ** 2, dim=-1))  # ("num_rays":...,)
         dy = torch.sqrt(torch.sum((directions - directions_stack[2]) ** 2, dim=-1))  # ("num_rays":...,)
@@ -685,13 +737,50 @@ class Cameras(TensorDataclass):
 
         times = self.times[camera_indices, 0] if self.times is not None else None
 
+        ### SAGE_CUSTOM
+        # Ignore this for now
+        #TODO: From discussion with Jingwei
+        # if optimizing:
+        # do the numpy 2 stage refraction
+        # randomly select batch size rays
+        # do the torch 2 stage refraction
+        # else:
+        # lines 565-573ish from jingwei
+        ### insert Jingwei's NUMPY convert cam rays to totem rays code ###
+        ### add assertion to make sure that ray bundle size > batch size still
+
+        ###SAGE_CUSTOM
+        # import pdb; pdb.set_trace()
+        true_indices_first_np = np.array(true_indices[0].cpu()) #CAVEAT: only for 1 Camera dim (that's why indexing into 1st and only elem of true_indices)
+        all_init_totem_poses = init_totem_pos[true_indices_first_np]
+        #CAVEAT HARDCODING negating y values in directions
+        negated_d = torch.Tensor(directions.cpu().detach().numpy()*[1,-1,1])
+        # totem_rays_o, totem_rays_d, valid_idx_1, valid_idx_2, valid_idx_3 = \
+        #     cam_rays_to_totem_rays_numpy(totem_radius, near, origins, directions, all_init_totem_poses, W, H, K, ior_totem=1.52, ior_air=1.0)
+        totem_rays_o, totem_rays_d, valid_idx_1, valid_idx_2, valid_idx_3 = \
+            cam_rays_to_totem_rays_numpy(totem_radius, near, origins, negated_d, all_init_totem_poses, W, H, K, ior_totem=1.52, ior_air=1.0)
+        np.save('totem_rays_o.npy', totem_rays_o)
+        np.save('totem_rays_d.npy', totem_rays_o)
+
+        totem_rays_o = torch.Tensor(totem_rays_o).to(self.device)
+        totem_rays_d = torch.Tensor(totem_rays_d).to(self.device)
+
+        #SAGE_CUSTOM CAVEAT for now: trim end of array
+        indices_remaining = np.arange(0, 4096)
+        totem_rays_o = totem_rays_o[indices_remaining]
+        totem_rays_d = totem_rays_d[indices_remaining]
+        camera_indices = camera_indices[valid_idx_1][valid_idx_2][valid_idx_3][indices_remaining]
+        pixel_area = pixel_area[valid_idx_1][valid_idx_2][valid_idx_3][indices_remaining]
+
+        import pdb; pdb.set_trace()
         return RayBundle(
-            origins=origins,
-            directions=directions,
+            origins=totem_rays_o,
+            directions=totem_rays_d,
             pixel_area=pixel_area,
             camera_indices=camera_indices,
             times=times,
-        )
+        )#, \
+            #   valid_idx_1, valid_idx_2, valid_idx_3, indices_remaining
 
     def to_json(
         self, camera_idx: int, image: Optional[TensorType["height", "width", 2]] = None, max_size: Optional[int] = None

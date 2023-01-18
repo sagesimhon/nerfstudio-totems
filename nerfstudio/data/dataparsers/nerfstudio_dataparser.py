@@ -181,6 +181,7 @@ class Nerfstudio(DataParser):
             orientation_method = self.config.orientation_method
 
         poses = torch.from_numpy(np.array(poses).astype(np.float32))
+        # import pdb; pdb.set_trace()
         poses = camera_utils.auto_orient_and_center_poses(
             poses,
             method=orientation_method,
@@ -188,9 +189,12 @@ class Nerfstudio(DataParser):
         )
 
         # Scale poses
+        # import pdb; pdb.set_trace()
         scale_factor = 1.0
         if self.config.auto_scale_poses:
-            scale_factor /= torch.max(torch.abs(poses[:, :3, 3]))
+            # scale_factor /= torch.max(torch.abs(poses[:, :3, 3]))
+            scale_factor /= (torch.max(torch.abs(poses[:, :, 3])) or 1.0) ###SAGE_CUSTOM possible bug fix? CAVEAT could this cause problems with training if needs unit cube
+
 
         poses[:, :3, 3] *= scale_factor * self.config.scale_factor
 

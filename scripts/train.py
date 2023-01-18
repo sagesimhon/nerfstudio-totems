@@ -82,6 +82,7 @@ def train_loop(local_rank: int, world_size: int, config: cfg.Config, global_rank
         world_size: total number of gpus available
         config: config file specifying training regimen
     """
+    # import pdb; pdb.set_trace()
     _set_random_seed(config.machine.seed + global_rank)
     trainer = Trainer(config, local_rank, world_size)
     trainer.setup()
@@ -220,6 +221,8 @@ def main(config: cfg.Config) -> None:
 
     config.set_timestamp()
     if config.data:
+        CONSOLE.log("We are in config.data conditional in train.py/main function")
+        CONSOLE.log(config)
         CONSOLE.log("Using --data alias for --data.pipeline.datamanager.dataparser.data")
         config.pipeline.datamanager.dataparser.data = config.data
 
@@ -245,12 +248,8 @@ def entrypoint():
     """Entrypoint for use with pyproject scripts."""
     # Choose a base configuration and override values.
     tyro.extras.set_accent_color("bright_yellow")
-    main(
-        tyro.cli(
-            AnnotatedBaseConfigUnion,
-            description=convert_markup_to_ansi(__doc__),
-        )
-    )
+    d = convert_markup_to_ansi(__doc__)
+    main(tyro.cli(AnnotatedBaseConfigUnion,description=d,))
 
 
 if __name__ == "__main__":

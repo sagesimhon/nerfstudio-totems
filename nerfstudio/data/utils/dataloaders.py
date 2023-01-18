@@ -25,6 +25,7 @@ from typing import Dict, Optional, Tuple, Union
 
 import torch
 from rich.progress import Console, track
+from rich.console import Console as PrintingConsole
 from torch.utils.data import Dataset
 from torch.utils.data.dataloader import DataLoader
 
@@ -35,6 +36,7 @@ from nerfstudio.data.utils.nerfstudio_collate import nerfstudio_collate
 from nerfstudio.utils.misc import get_dict_to_torch
 
 CONSOLE = Console(width=120)
+PRINTINGCONSOLE = PrintingConsole(width=120)
 
 
 class CacheDataloader(DataLoader):
@@ -73,6 +75,7 @@ class CacheDataloader(DataLoader):
         self.cached_collated_batch = None
         if self.cache_all_images:
             CONSOLE.print(f"Caching all {len(self.dataset)} images.")
+            CONSOLE.print("test3")
             if len(self.dataset) > 500:
                 CONSOLE.print(
                     "[bold yellow]Warning: If you run out of memory, try reducing the number of images to sample from."
@@ -182,6 +185,10 @@ class EvalDataloader(DataLoader):
             image_idx: Camera image index
         """
         ray_bundle = self.cameras.generate_rays(camera_indices=image_idx, keep_shape=True)
+        s = "In dataloaders.py: ray_bundle shape: " + str(ray_bundle.shape)
+        CONSOLE.print("IN here")
+        CONSOLE.print(s)
+        PRINTINGCONSOLE.print("In hereeeeeeeeeeeeeeeee")
         batch = self.input_dataset[image_idx]
         batch = get_dict_to_torch(batch, device=self.device, exclude=["image"])
         return ray_bundle, batch

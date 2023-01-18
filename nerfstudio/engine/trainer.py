@@ -130,6 +130,17 @@ class Trainer:
 
     def train(self) -> None:
         """Train the model."""
+
+        ### SAGE_CUSTOM
+        # # Precompute Totem Rays if NOT OPTIMIZING totem poses
+        # import pdb; pdb.set_trace()
+        # optimize_bool = ...
+        # if optimize_bool:
+        #     ...
+        # else:
+        #     all_precomputed_rays = []
+        #     #for totem_idx in range()
+        # ###
         assert self.pipeline.datamanager.train_dataset is not None, "Missing DatsetInputs"
 
         self._init_viewer_state()
@@ -138,6 +149,8 @@ class Trainer:
             step = 0
             for step in range(self._start_step, self._start_step + num_iterations):
                 with TimeWriter(writer, EventName.ITER_TRAIN_TIME, step=step) as train_t:
+                    # import pdb;
+                    # pdb.set_trace()
 
                     self.pipeline.train()
 
@@ -271,7 +284,7 @@ class Trainer:
             CONSOLE.print(f"done loading checkpoint from {load_path}")
         else:
             CONSOLE.print("No checkpoints to load, training from scratch")
-
+            CONSOLE.print("TEST")
     @check_main_thread
     def save_checkpoint(self, step: int) -> None:
         """Save the model and optimizers

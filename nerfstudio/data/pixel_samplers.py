@@ -33,21 +33,29 @@ def collate_image_dataset_batch(batch: Dict, num_rays_per_batch: int, keep_full_
         num_rays_per_batch: number of rays to sample per batch
         keep_full_image: whether or not to include a reference to the full image in returned batch
     """
+    ###CUSTOM_SAGE CAVEAT HARDCODING OVERSAMPLING OF RAYS:
+    num_rays_per_batch *= 2
+
     device = batch["image"].device
     num_images, image_height, image_width, _ = batch["image"].shape
 
     # only sample within the mask, if the mask is in the batch
-    if "mask" in batch:
+    # import pdb; pdb.set_trace()
+    if "mask" in batch: ###SAGE_CUSTOM we might want to use this
         nonzero_indices = torch.nonzero(batch["mask"][..., 0].to(device), as_tuple=False)
         chosen_indices = random.sample(range(len(nonzero_indices)), k=num_rays_per_batch)
         indices = nonzero_indices[chosen_indices]
     else:
+        ### SAGE_CUSTOM QUESTION why (num_rays_per_batch, 3) for torch.rand? Why different random values along second dim? Ans: it's c,y,x (c= camera)
         indices = torch.floor(
             torch.rand((num_rays_per_batch, 3), device=device)
             * torch.tensor([num_images, image_height, image_width], device=device)
         ).long()
 
+    # import pdb; pdb.set_trace()
     c, y, x = (i.flatten() for i in torch.split(indices, 1, dim=-1))
+    ###SAGE_CUSTOM fix for 3 channels found from git issue
+    # c, y, x = (i.flatten() for i in torch.split(indices[..., :3], 1, dim=-1))
     collated_batch = {key: value[c, y, x] for key, value in batch.items() if key != "image_idx" and value is not None}
 
     assert collated_batch["image"].shape == (num_rays_per_batch, 3), collated_batch["image"].shape
@@ -76,6 +84,10 @@ def collate_image_dataset_batch_list(batch: Dict, num_rays_per_batch: int, keep_
         num_rays_per_batch: number of rays to sample per batch
         keep_full_image: whether or not to include a reference to the full image in returned batch
     """
+    # import pdb;
+    # pdb.set_trace()
+    ###CUSTOM_SAGE CAVEAT HARDCODING OVERSAMPLING OF RAYS:
+    num_rays_per_batch *= 2
 
     device = batch["image"][0].device
     num_images = len(batch["image"])
@@ -159,6 +171,7 @@ class PixelSampler:  # pylint: disable=too-few-public-methods
         Args:
             image_batch: batch of images to sample from
         """
+        # import pdb; pdb.set_trace()
         if isinstance(image_batch["image"], list):
             image_batch = dict(image_batch.items())  # copy the dictioary so we don't modify the original
             pixel_batch = collate_image_dataset_batch_list(
