@@ -193,6 +193,14 @@ Using an existing dataset is great, but likely you want to use your own data! We
 | 🖥 [Metashape](https://docs.nerf.studio/en/latest/quickstart/custom_dataset.html#metashape)        |                  | 🐢                  |
 | 🛠 [Custom](https://docs.nerf.studio/en/latest/quickstart/data_conventions.html)                   | Poses            | 🐇                  |
 
+## 4. Using Totems Data
+A zip of all data used can be downloaded at the following link:
+https://drive.google.com/drive/folders/1z9zd5JY6_JMjzSFxOmfFEiyRIEgeSaA4?usp=sharing
+The /nerfstudio/totems folder contains totems data with masks. This data assumes a camera with the Identity transform. 
+To use this data and avoid issues with the Identity c2w input, run:
+```bash
+ns-train nerfacto --data data/nerfstudio/totems --viewer.zmq-port=8888 --viewer.websocket-port=7777 nerfstudio-data —orientation_method "none"
+```
 ## 5. Advanced Options
 
 ### Training models other than nerfacto
