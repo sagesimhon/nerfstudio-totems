@@ -200,7 +200,7 @@ https://drive.google.com/drive/folders/1z9zd5JY6_JMjzSFxOmfFEiyRIEgeSaA4?usp=sha
 The /nerfstudio/totems folder contains totems data with masks. This data assumes a camera with the Identity transform. 
 To use this data and avoid issues with the Identity c2w input, run:
 ```bash
-ns-train nerfacto --data data/nerfstudio/totems --viewer.zmq-port=8888 --viewer.websocket-port=7777 nerfstudio-data —orientation_method "none"
+ns-train nerfacto --data data/nerfstudio/totems --viewer.zmq-port=8888 --viewer.websocket-port=7777 nerfstudio-data --orientation_method "none"
 ```
 ## 5. Advanced Options
 
