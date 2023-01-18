@@ -194,8 +194,9 @@ Using an existing dataset is great, but likely you want to use your own data! We
 | 🛠 [Custom](https://docs.nerf.studio/en/latest/quickstart/data_conventions.html)                   | Poses            | 🐇                  |
 
 ## 4.1. Using Totems Data
-Alternative to the commands in step 2, a zip of all data used can be downloaded at the following link:
-https://drive.google.com/drive/folders/1z9zd5JY6_JMjzSFxOmfFEiyRIEgeSaA4?usp=sharing
+Alternative to the download command in Step 2, a zip of all data used can be downloaded at the following link:
+https://drive.google.com/drive/folders/1z9zd5JY6_JMjzSFxOmfFEiyRIEgeSaA4?usp=sharing.
+
 The /nerfstudio/totems folder contains totems data with masks. This data assumes a camera with the Identity transform. 
 To use this data and avoid issues with the Identity c2w input, run:
 ```bash
