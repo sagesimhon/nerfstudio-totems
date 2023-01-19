@@ -772,10 +772,17 @@ class Cameras(TensorDataclass):
         camera_indices = camera_indices[valid_idx_1][valid_idx_2][valid_idx_3][indices_remaining]
         pixel_area = pixel_area[valid_idx_1][valid_idx_2][valid_idx_3][indices_remaining]
 
+        # Totem rays created by Jingwei's code cannot be backpropagated through, so we need to assign those values to `origins` and `directions`.
+        n_totem_rays = totem_rays_o.shape[0]
+        origins[:n_totem_rays] = totem_rays_o
+        origins = origins[:n_totem_rays]
+        directions[:n_totem_rays] = totem_rays_d
+        directions = directions[:n_totem_rays]
+
         # import pdb; pdb.set_trace()
         return RayBundle(
-            origins=totem_rays_o,
-            directions=totem_rays_d,
+            origins=origins,
+            directions=directions,
             pixel_area=pixel_area,
             camera_indices=camera_indices,
             times=times,
