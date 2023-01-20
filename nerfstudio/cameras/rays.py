@@ -159,6 +159,9 @@ class RayBundle(TensorDataclass):
     """Additional metadata or data needed for interpolation, will mimic shape of rays"""
     times: Optional[TensorType[..., 1]] = None
     """Times at which rays are sampled"""
+    valid_idx_1: Optional[list] = None
+    valid_idx_2: Optional[list] = None
+    valid_idx_3: Optional[list] = None
 
     def set_camera_indices(self, camera_index: int) -> None:
         """Sets all of the the camera indices to a specific camera index.

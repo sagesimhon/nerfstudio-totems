@@ -47,13 +47,14 @@ class RayGenerator(nn.Module):
         c = ray_indices[:, 0]  # camera indices
         y = ray_indices[:, 1]  # row indices
         x = ray_indices[:, 2]  # col indices
-        #import pdb
-        #pdb.set_trace()
+
         coords = self.image_coords[y, x]
+        # Catch bug related to coords
+        if coords.shape[0] == 0 or coords.shape[1] == 0:
+            import pdb; pdb.set_trace()
 
         camera_opt_to_camera = self.pose_optimizer(c)
 
-        # import pdb; pdb.set_trace()
         ray_bundle = self.cameras.generate_rays(
             camera_indices=c.unsqueeze(-1),
             coords=coords,

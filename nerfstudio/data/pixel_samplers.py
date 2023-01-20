@@ -84,8 +84,8 @@ def collate_image_dataset_batch_list(batch: Dict, num_rays_per_batch: int, keep_
         num_rays_per_batch: number of rays to sample per batch
         keep_full_image: whether or not to include a reference to the full image in returned batch
     """
-    # import pdb;
-    # pdb.set_trace()
+
+    raise NotImplementedError("Haven't finished updating this function for totems")
     ###CUSTOM_SAGE CAVEAT HARDCODING OVERSAMPLING OF RAYS:
     num_rays_per_batch *= 2
 

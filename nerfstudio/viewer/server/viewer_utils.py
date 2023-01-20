@@ -135,6 +135,7 @@ class RenderThread(threading.Thread):
         self.exc = None
         self.vis_outputs = None
 
+    #### SAGE_CUSTOM Add rays visualization into the viewer here?
     def run(self):
         """run function that renders out images given the current graph and ray bundles.
         Interlaced with a trace function that checks to see if any I/O changes were registered.
@@ -773,6 +774,7 @@ class ViewerState:
         )
         camera = camera.to(graph.device)
 
+        import pdb; pdb.set_trace()
         camera_ray_bundle = camera.generate_rays(camera_indices=0)
 
         graph.eval()

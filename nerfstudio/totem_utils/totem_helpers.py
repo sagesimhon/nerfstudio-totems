@@ -261,9 +261,13 @@ def get_refracted_ray_numpy(S1, N, n1, n2):
         Returns:
             the refracted ray direction, array size (N, 3)
     '''
-    return n1 / n2 * np.cross(N, np.cross(-N, S1)) - N * np.sqrt(
-        1 - n1 ** 2 / n2 ** 2 * np.sum(np.cross(N, S1) * np.cross(N, S1), axis=1))[:, None]
-
+    try:
+        return n1 / n2 * np.cross(N, np.cross(-N, S1)) - N * np.sqrt(
+            1 - n1 ** 2 / n2 ** 2 * np.sum(np.cross(N, S1) * np.cross(N, S1), axis=1))[:, None]
+    # Catch bug currently running into related to mismatched shapes of params in np.cross
+    except Exception as e:
+        import pdb; pdb.set_trace()
+        raise e
 
 def cam_rays_to_totem_rays_numpy(totem_radius, near, cam_rays_o, cam_rays_d, totem_pos, W, H, K, ior_totem, ior_air=1.0):
     '''

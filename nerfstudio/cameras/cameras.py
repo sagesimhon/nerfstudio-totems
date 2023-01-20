@@ -572,13 +572,18 @@ class Cameras(TensorDataclass):
         Returns:
             Rays for the given camera indices and coords. RayBundle.shape == num_rays
         """
-        ###CUSTOM_SAGE debugging
-        pylab.ion()
-        pylab.plot(coords.cpu()[:, 0], coords.cpu()[:, 1])
-        pylab.draw()
-        pylab.show()
-        plt.plot(coords.cpu()[:, 0], coords.cpu()[:, 1])
-        # plt.savefig()###SAGE_CUSTOM TODO
+        ###CUSTOM_SAGE debugging hack
+        is_plot = False
+        if is_plot:
+            pylab.ion()
+            try:
+                pylab.plot(coords.cpu()[:, 0], coords.cpu()[:, 1])
+                pylab.draw()
+                pylab.show()
+                plt.plot(coords.cpu()[:, 0], coords.cpu()[:, 1])
+            except Exception as e:
+                import pdb; pdb.set_trace()
+            # plt.savefig()###SAGE_CUSTOM TODO
 
         ###
         # import pdb;
@@ -765,8 +770,11 @@ class Cameras(TensorDataclass):
         totem_rays_o = torch.Tensor(totem_rays_o).to(self.device)
         totem_rays_d = torch.Tensor(totem_rays_d).to(self.device)
 
+        assert totem_rays_o.shape[0] >= 4096
+        assert totem_rays_d.shape[0] >= 4096
+
         #SAGE_CUSTOM CAVEAT for now: trim end of array
-        indices_remaining = np.arange(0, 4096)
+        indices_remaining = np.arange(0, 4096) #TODO SAGE randomly sample
         totem_rays_o = totem_rays_o[indices_remaining]
         totem_rays_d = totem_rays_d[indices_remaining]
         camera_indices = camera_indices[valid_idx_1][valid_idx_2][valid_idx_3][indices_remaining]
@@ -786,8 +794,10 @@ class Cameras(TensorDataclass):
             pixel_area=pixel_area,
             camera_indices=camera_indices,
             times=times,
-        )#, \
-            #   valid_idx_1, valid_idx_2, valid_idx_3, indices_remaining
+            valid_idx_1=valid_idx_1,
+            valid_idx_2=valid_idx_2,
+            valid_idx_3=valid_idx_3
+        )
 
     def to_json(
         self, camera_idx: int, image: Optional[TensorType["height", "width", 2]] = None, max_size: Optional[int] = None
