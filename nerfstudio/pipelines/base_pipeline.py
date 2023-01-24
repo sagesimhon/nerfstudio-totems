@@ -251,6 +251,8 @@ class VanillaPipeline(Pipeline):
         Args:
             step: current iteration step to update sampler if using DDP (distributed)
         """
+        ### SAGE: entry point to training step
+        # print("********in get_train_loss_dict*****")
         ray_bundle, batch = self.datamanager.next_train(step)
         model_outputs = self.model(ray_bundle)
         metrics_dict = self.model.get_metrics_dict(model_outputs, batch)
@@ -284,6 +286,8 @@ class VanillaPipeline(Pipeline):
         Args:
             step: current iteration step
         """
+        print("********get_eval_loss_dict*****")
+
         self.eval()
         ray_bundle, batch = self.datamanager.next_eval(step)
         model_outputs = self.model(ray_bundle)
@@ -300,6 +304,8 @@ class VanillaPipeline(Pipeline):
         Args:
             step: current iteration step
         """
+        print("********get_eval_image_metrics_and_images*****")
+
         self.eval()
         image_idx, camera_ray_bundle, batch = self.datamanager.next_eval_image(step)
         outputs = self.model.get_outputs_for_camera_ray_bundle(camera_ray_bundle)
@@ -318,6 +324,8 @@ class VanillaPipeline(Pipeline):
         Returns:
             metrics_dict: dictionary of metrics
         """
+        print("********get_average_eval_image_metrics*****")
+
         self.eval()
         metrics_dict_list = []
         num_images = len(self.datamanager.fixed_indices_eval_dataloader)

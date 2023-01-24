@@ -221,8 +221,8 @@ def main(config: cfg.Config) -> None:
 
     config.set_timestamp()
     if config.data:
-        CONSOLE.log("We are in config.data conditional in train.py/main function")
-        CONSOLE.log(config)
+        # CONSOLE.log("We are in config.data conditional in train.py/main function")
+        # CONSOLE.log(config)
         CONSOLE.log("Using --data alias for --data.pipeline.datamanager.dataparser.data")
         config.pipeline.datamanager.dataparser.data = config.data
 

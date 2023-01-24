@@ -774,7 +774,8 @@ class ViewerState:
         )
         camera = camera.to(graph.device)
 
-        import pdb; pdb.set_trace()
+        # SAGE todo: why is this always 0?
+        # import pdb; pdb.set_trace()
         camera_ray_bundle = camera.generate_rays(camera_indices=0)
 
         graph.eval()

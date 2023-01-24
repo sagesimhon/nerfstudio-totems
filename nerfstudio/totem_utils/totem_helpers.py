@@ -5,6 +5,7 @@ import imageio
 import cv2
 import torch
 import torch.nn as nn
+from nerfstudio.totem_utils.timeit import timeit
 
 
 # ---------------------------- NumPy methods --------------------------------------------
@@ -183,7 +184,7 @@ def load_real_data(args, downsample=1):
 
     return data
 
-
+@timeit
 def line_sphere_intersection_numpy(totem_pos, totem_radius, rays_d, rays_o, use_min=True):
     '''
         Calculate the camera ray intersection with a totem.
@@ -269,6 +270,8 @@ def get_refracted_ray_numpy(S1, N, n1, n2):
         import pdb; pdb.set_trace()
         raise e
 
+
+@timeit
 def cam_rays_to_totem_rays_numpy(totem_radius, near, cam_rays_o, cam_rays_d, totem_pos, W, H, K, ior_totem, ior_air=1.0):
     '''
         Figure 3 in paper.

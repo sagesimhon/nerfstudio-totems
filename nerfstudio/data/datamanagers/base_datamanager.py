@@ -20,6 +20,8 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from dataclasses import dataclass, field
+
+from nerfstudio.totem_utils.timeit import timeit
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import torch
@@ -404,6 +406,7 @@ class VanillaDataManager(DataManager):  # pylint: disable=abstract-method
             num_workers=self.world_size * 4,
         )
 
+    @timeit
     def next_train(self, step: int) -> Tuple[RayBundle, Dict]:
         ###SAGE_CUSTOM this is where the next batch of data/rays are returned
         ###
@@ -427,13 +430,15 @@ class VanillaDataManager(DataManager):  # pylint: disable=abstract-method
         assert batch['mask'].shape[0] == self.config.train_num_rays_per_batch
         assert batch['indices'].shape[0] == self.config.train_num_rays_per_batch
 
-        np.save(f'origins: {step:.3f}', ray_bundle.origins.cpu().detach().numpy())
-        np.save(f'directions: {step:.3f}', ray_bundle.directions.cpu().detach().numpy())
+        np.save(f'../rays/origins: {step:.3f}', ray_bundle.origins.cpu().detach().numpy())
+        np.save(f'../rays/directions: {step:.3f}', ray_bundle.directions.cpu().detach().numpy())
         # import pdb; pdb.set_trace()
 
         return ray_bundle, batch
 
+    @timeit
     def next_eval(self, step: int) -> Tuple[RayBundle, Dict]:
+        #TODO sage implement ray bundle changes
         """Returns the next batch of data from the eval dataloader."""
         self.eval_count += 1
         image_batch = next(self.iter_eval_image_dataloader)
@@ -442,7 +447,9 @@ class VanillaDataManager(DataManager):  # pylint: disable=abstract-method
         ray_bundle = self.eval_ray_generator(ray_indices)
         return ray_bundle, batch
 
+    @timeit
     def next_eval_image(self, step: int) -> Tuple[int, RayBundle, Dict]:
+        #TODO sage implement ray bundle changes as in next_train
         for camera_ray_bundle, batch in self.eval_dataloader:
             assert camera_ray_bundle.camera_indices is not None
             image_idx = int(camera_ray_bundle.camera_indices[0, 0, 0])

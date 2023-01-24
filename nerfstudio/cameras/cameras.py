@@ -32,6 +32,8 @@ from nerfstudio.cameras import camera_utils
 from nerfstudio.cameras.rays import RayBundle
 from nerfstudio.utils.tensor_dataclass import TensorDataclass
 
+from nerfstudio.totem_utils.timeit import timeit
+
 ###SAGE_CUSTOM totem helpers imports + hardcoding
 """
 Totem helpers
@@ -329,6 +331,7 @@ class Cameras(TensorDataclass):
             image_coords = torch.stack(image_coords, dim=-1) + pixel_offset  # stored as (y, x) coordinates
         return image_coords
 
+    @timeit
     def generate_rays(  # pylint: disable=too-many-statements
         self,
         camera_indices: Union[TensorType["num_rays":..., "num_cameras_batch_dims"], int],
@@ -495,6 +498,7 @@ class Cameras(TensorDataclass):
         return raybundle
 
     # pylint: disable=too-many-statements
+    @timeit
     def _generate_rays_from_coords(
         self,
         camera_indices: TensorType["num_rays":..., "num_cameras_batch_dims"],
@@ -770,8 +774,13 @@ class Cameras(TensorDataclass):
         totem_rays_o = torch.Tensor(totem_rays_o).to(self.device)
         totem_rays_d = torch.Tensor(totem_rays_d).to(self.device)
 
-        assert totem_rays_o.shape[0] >= 4096
-        assert totem_rays_d.shape[0] >= 4096
+        # assert totem_rays_o.shape[0] >= 4096
+        # assert totem_rays_d.shape[0] >= 4096
+        #if totem_rays_o.shape[0] < 4096:
+        #    import pdb; pdb.set_trace()
+        #if totem_rays_d.shape[0] < 4096:
+        #    import pdb; pdb.set_trace()
+
 
         #SAGE_CUSTOM CAVEAT for now: trim end of array
         indices_remaining = np.arange(0, 4096) #TODO SAGE randomly sample
