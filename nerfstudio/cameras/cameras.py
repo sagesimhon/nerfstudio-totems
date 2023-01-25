@@ -340,6 +340,7 @@ class Cameras(TensorDataclass):
         distortion_params_delta: Optional[TensorType["num_rays":..., 6]] = None,
         keep_shape: Optional[bool] = None,
         disable_distortion: bool = False,
+        is_viewer: bool = False
     ) -> RayBundle:
         """Generates rays for the given camera indices.
 
@@ -482,7 +483,7 @@ class Cameras(TensorDataclass):
         # raybundle.shape == (num_rays) when done
         # pylint: disable=protected-access
         raybundle = cameras._generate_rays_from_coords(
-            camera_indices, coords, camera_opt_to_camera, distortion_params_delta, disable_distortion=disable_distortion
+            camera_indices, coords, camera_opt_to_camera, distortion_params_delta, disable_distortion=disable_distortion, is_viewer=is_viewer
         )
 
         # If we have mandated that we don't keep the shape, then we flatten
@@ -506,6 +507,7 @@ class Cameras(TensorDataclass):
         camera_opt_to_camera: Optional[TensorType["num_rays":..., 3, 4]] = None,
         distortion_params_delta: Optional[TensorType["num_rays":..., 6]] = None,
         disable_distortion: bool = False,
+        is_viewer: bool = False
     ) -> RayBundle:
         """Generates rays for the given camera indices and coords where self isn't jagged
 
@@ -746,55 +748,55 @@ class Cameras(TensorDataclass):
 
         times = self.times[camera_indices, 0] if self.times is not None else None
 
-        ### SAGE_CUSTOM
-        # Ignore this for now
-        #TODO: From discussion with Jingwei
-        # if optimizing:
-        # do the numpy 2 stage refraction
-        # randomly select batch size rays
-        # do the torch 2 stage refraction
-        # else:
-        # lines 565-573ish from jingwei
-        ### insert Jingwei's NUMPY convert cam rays to totem rays code ###
-        ### add assertion to make sure that ray bundle size > batch size still
+        if not is_viewer:
+            ### SAGE_CUSTOM
+            # Ignore this for now
+            #TODO: From discussion with Jingwei
+            # if optimizing:
+            # do the numpy 2 stage refraction
+            # randomly select batch size rays
+            # do the torch 2 stage refraction
+            # else:
+            # lines 565-573ish from jingwei
+            ### insert Jingwei's NUMPY convert cam rays to totem rays code ###
+            ### add assertion to make sure that ray bundle size > batch size still
 
-        ###SAGE_CUSTOM
-        # import pdb; pdb.set_trace()
-        true_indices_first_np = np.array(true_indices[0].cpu()) #CAVEAT: only for 1 Camera dim (that's why indexing into 1st and only elem of true_indices)
-        all_init_totem_poses = init_totem_pos[true_indices_first_np]
-        #CAVEAT HARDCODING negating y values in directions
-        negated_d = torch.Tensor(directions.cpu().detach().numpy()*[1,-1,1])
-        # totem_rays_o, totem_rays_d, valid_idx_1, valid_idx_2, valid_idx_3 = \
-        #     cam_rays_to_totem_rays_numpy(totem_radius, near, origins, directions, all_init_totem_poses, W, H, K, ior_totem=1.52, ior_air=1.0)
-        totem_rays_o, totem_rays_d, valid_idx_1, valid_idx_2, valid_idx_3 = \
-            cam_rays_to_totem_rays_numpy(totem_radius, near, origins, negated_d, all_init_totem_poses, W, H, K, ior_totem=1.52, ior_air=1.0)
-        np.save('totem_rays_o.npy', totem_rays_o)
-        np.save('totem_rays_d.npy', totem_rays_o)
+            ###SAGE_CUSTOM
+            # import pdb; pdb.set_trace()
+            true_indices_first_np = np.array(true_indices[0].cpu()) #CAVEAT: only for 1 Camera dim (that's why indexing into 1st and only elem of true_indices)
+            all_init_totem_poses = init_totem_pos[true_indices_first_np]
+            #CAVEAT HARDCODING negating y values in directions
+            negated_d = torch.Tensor(directions.cpu().detach().numpy()*[1,-1,1])
+            # totem_rays_o, totem_rays_d, valid_idx_1, valid_idx_2, valid_idx_3 = \
+            #     cam_rays_to_totem_rays_numpy(totem_radius, near, origins, directions, all_init_totem_poses, W, H, K, ior_totem=1.52, ior_air=1.0)
+            totem_rays_o, totem_rays_d, valid_idx_1, valid_idx_2, valid_idx_3 = \
+                cam_rays_to_totem_rays_numpy(totem_radius, near, origins, negated_d, all_init_totem_poses, W, H, K, ior_totem=1.52, ior_air=1.0)
+            np.save('totem_rays_o.npy', totem_rays_o)
+            np.save('totem_rays_d.npy', totem_rays_o)
 
-        totem_rays_o = torch.Tensor(totem_rays_o).to(self.device)
-        totem_rays_d = torch.Tensor(totem_rays_d).to(self.device)
+            totem_rays_o = torch.Tensor(totem_rays_o).to(self.device)
+            totem_rays_d = torch.Tensor(totem_rays_d).to(self.device)
 
-        # assert totem_rays_o.shape[0] >= 4096
-        # assert totem_rays_d.shape[0] >= 4096
-        #if totem_rays_o.shape[0] < 4096:
-        #    import pdb; pdb.set_trace()
-        #if totem_rays_d.shape[0] < 4096:
-        #    import pdb; pdb.set_trace()
+            # assert totem_rays_o.shape[0] >= 4096
+            # assert totem_rays_d.shape[0] >= 4096
+            #if totem_rays_o.shape[0] < 4096:
+            #    import pdb; pdb.set_trace()
+            #if totem_rays_d.shape[0] < 4096:
+            #    import pdb; pdb.set_trace()
 
+            #SAGE_CUSTOM CAVEAT for now: trim end of array
+            indices_remaining = np.arange(0, 4096)
+            totem_rays_o = totem_rays_o[indices_remaining]
+            totem_rays_d = totem_rays_d[indices_remaining]
+            camera_indices = camera_indices[valid_idx_1][valid_idx_2][valid_idx_3][indices_remaining]
+            pixel_area = pixel_area[valid_idx_1][valid_idx_2][valid_idx_3][indices_remaining]
 
-        #SAGE_CUSTOM CAVEAT for now: trim end of array
-        indices_remaining = np.arange(0, 4096) #TODO SAGE randomly sample
-        totem_rays_o = totem_rays_o[indices_remaining]
-        totem_rays_d = totem_rays_d[indices_remaining]
-        camera_indices = camera_indices[valid_idx_1][valid_idx_2][valid_idx_3][indices_remaining]
-        pixel_area = pixel_area[valid_idx_1][valid_idx_2][valid_idx_3][indices_remaining]
-
-        # Totem rays created by Jingwei's code cannot be backpropagated through, so we need to assign those values to `origins` and `directions`.
-        n_totem_rays = totem_rays_o.shape[0]
-        origins[:n_totem_rays] = totem_rays_o
-        origins = origins[:n_totem_rays]
-        directions[:n_totem_rays] = totem_rays_d
-        directions = directions[:n_totem_rays]
+            # Totem rays created by Jingwei's code cannot be backpropagated through, so we need to assign those values to `origins` and `directions`.
+            n_totem_rays = totem_rays_o.shape[0]
+            origins[:n_totem_rays] = totem_rays_o
+            origins = origins[:n_totem_rays]
+            directions[:n_totem_rays] = totem_rays_d
+            directions = directions[:n_totem_rays]        
 
         # import pdb; pdb.set_trace()
         return RayBundle(

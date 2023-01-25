@@ -773,11 +773,10 @@ class ViewerState:
             times=times,
         )
         camera = camera.to(graph.device)
-
         # SAGE todo: why is this always 0?
         # import pdb; pdb.set_trace()
-        camera_ray_bundle = camera.generate_rays(camera_indices=0)
-
+        camera_ray_bundle = camera.generate_rays(camera_indices=0, is_viewer=True)
+       
         graph.eval()
 
         check_thread = CheckThread(state=self)
