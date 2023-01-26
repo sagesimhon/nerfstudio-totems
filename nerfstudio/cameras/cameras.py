@@ -748,10 +748,13 @@ class Cameras(TensorDataclass):
 
         times = self.times[camera_indices, 0] if self.times is not None else None
 
+        valid_idx_1 = []
+        valid_idx_2 = []
+        valid_idx_3 = []
         if not is_viewer:
             ### SAGE_CUSTOM
             # Ignore this for now
-            #TODO: From discussion with Jingwei
+            # TODO: From discussion with Jingwei
             # if optimizing:
             # do the numpy 2 stage refraction
             # randomly select batch size rays

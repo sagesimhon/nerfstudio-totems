@@ -18,6 +18,7 @@ Datamanager.
 
 from __future__ import annotations
 
+from pathlib import Path
 from abc import abstractmethod
 from dataclasses import dataclass, field
 
@@ -421,17 +422,19 @@ class VanillaDataManager(DataManager):  # pylint: disable=abstract-method
         valid_idx_2 = ray_bundle.valid_idx_2
         valid_idx_3 = ray_bundle.valid_idx_3
         indices_remaining = np.arange(0, 4096) #TODO SAGE generalize from 4096
-
-        batch['image'] = batch['image'][valid_idx_1][valid_idx_2][valid_idx_3][indices_remaining]
-        batch['mask'] = batch['mask'][valid_idx_1][valid_idx_2][valid_idx_3][indices_remaining]
-        batch['indices'] = batch['indices'][valid_idx_1][valid_idx_2][valid_idx_3][indices_remaining]
+        if valid_idx_1 and valid_idx_2 and valid_idx_3:
+            batch['image'] = batch['image'][valid_idx_1][valid_idx_2][valid_idx_3][indices_remaining]
+            batch['mask'] = batch['mask'][valid_idx_1][valid_idx_2][valid_idx_3][indices_remaining]
+            batch['indices'] = batch['indices'][valid_idx_1][valid_idx_2][valid_idx_3][indices_remaining]
 
         assert batch['image'].shape[0] == self.config.train_num_rays_per_batch
         assert batch['mask'].shape[0] == self.config.train_num_rays_per_batch
         assert batch['indices'].shape[0] == self.config.train_num_rays_per_batch
 
-        np.save(f'../rays/origins: {step:.3f}', ray_bundle.origins.cpu().detach().numpy())
-        np.save(f'../rays/directions: {step:.3f}', ray_bundle.directions.cpu().detach().numpy())
+        debug_data_path = '../rays'
+        Path(debug_data_path).mkdir(parents=True, exist_ok=True)
+        np.save(f'{debug_data_path}/origins: {step:.3f}', ray_bundle.origins.cpu().detach().numpy())
+        np.save(f'{debug_data_path}/directions: {step:.3f}', ray_bundle.directions.cpu().detach().numpy())
         # import pdb; pdb.set_trace()
 
         return ray_bundle, batch
