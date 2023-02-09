@@ -59,5 +59,6 @@ class RayGenerator(nn.Module):
             camera_indices=c.unsqueeze(-1),
             coords=coords,
             camera_opt_to_camera=camera_opt_to_camera,
+            is_training=True
         )
         return ray_bundle
