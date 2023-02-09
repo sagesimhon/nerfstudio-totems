@@ -422,7 +422,7 @@ class VanillaDataManager(DataManager):  # pylint: disable=abstract-method
         valid_idx_2 = ray_bundle.valid_idx_2
         valid_idx_3 = ray_bundle.valid_idx_3
         indices_remaining = np.arange(0, 4096) #TODO SAGE generalize from 4096
-        if valid_idx_1 and valid_idx_2 and valid_idx_3:
+        if valid_idx_1.size and valid_idx_2.size and valid_idx_3.size:          # change for torch?
             batch['image'] = batch['image'][valid_idx_1][valid_idx_2][valid_idx_3][indices_remaining]
             batch['mask'] = batch['mask'][valid_idx_1][valid_idx_2][valid_idx_3][indices_remaining]
             batch['indices'] = batch['indices'][valid_idx_1][valid_idx_2][valid_idx_3][indices_remaining]

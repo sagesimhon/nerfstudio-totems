@@ -340,7 +340,8 @@ class Cameras(TensorDataclass):
         distortion_params_delta: Optional[TensorType["num_rays":..., 6]] = None,
         keep_shape: Optional[bool] = None,
         disable_distortion: bool = False,
-        is_viewer: bool = False
+        is_viewer: bool = False,
+        is_training: bool = False
     ) -> RayBundle:
         """Generates rays for the given camera indices.
 
@@ -483,7 +484,8 @@ class Cameras(TensorDataclass):
         # raybundle.shape == (num_rays) when done
         # pylint: disable=protected-access
         raybundle = cameras._generate_rays_from_coords(
-            camera_indices, coords, camera_opt_to_camera, distortion_params_delta, disable_distortion=disable_distortion, is_viewer=is_viewer
+            camera_indices, coords, camera_opt_to_camera, distortion_params_delta, disable_distortion=disable_distortion,
+            is_viewer=is_viewer, is_training=is_training
         )
 
         # If we have mandated that we don't keep the shape, then we flatten
@@ -507,7 +509,8 @@ class Cameras(TensorDataclass):
         camera_opt_to_camera: Optional[TensorType["num_rays":..., 3, 4]] = None,
         distortion_params_delta: Optional[TensorType["num_rays":..., 6]] = None,
         disable_distortion: bool = False,
-        is_viewer: bool = False
+        is_viewer: bool = False,
+        is_training: bool = False
     ) -> RayBundle:
         """Generates rays for the given camera indices and coords where self isn't jagged
 
@@ -748,10 +751,11 @@ class Cameras(TensorDataclass):
 
         times = self.times[camera_indices, 0] if self.times is not None else None
 
-        valid_idx_1 = []
-        valid_idx_2 = []
-        valid_idx_3 = []
+        valid_idx_1 = np.array([])
+        valid_idx_2 = np.array([])
+        valid_idx_3 = np.array([])
         if not is_viewer:
+        # if is_training:
             ### SAGE_CUSTOM
             # Ignore this for now
             # TODO: From discussion with Jingwei
