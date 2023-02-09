@@ -778,8 +778,8 @@ class Cameras(TensorDataclass):
             #     cam_rays_to_totem_rays_numpy(totem_radius, near, origins, directions, all_init_totem_poses, W, H, K, ior_totem=1.52, ior_air=1.0)
             totem_rays_o, totem_rays_d, valid_idx_1, valid_idx_2, valid_idx_3 = \
                 cam_rays_to_totem_rays_numpy(totem_radius, near, origins, negated_d, all_init_totem_poses, W, H, K, ior_totem=1.52, ior_air=1.0)
-            np.save('totem_rays_o.npy', totem_rays_o)
-            np.save('totem_rays_d.npy', totem_rays_o)
+            # np.save('totem_rays_o.npy', totem_rays_o)
+            # np.save('totem_rays_d.npy', totem_rays_o)
 
             totem_rays_o = torch.Tensor(totem_rays_o).to(self.device)
             totem_rays_d = torch.Tensor(totem_rays_d).to(self.device)
