@@ -63,7 +63,12 @@ class NerfactoModelConfig(ModelConfig):
     """Nerfacto Model Config"""
 
     _target: Type = field(default_factory=lambda: NerfactoModel)
-    near_plane: float = 0.05
+
+    ####SAGE_CUSTOM Commented out progress on changing near plane; stashed for future use
+    #near_plane: float = 0.05
+    #hardcoding near plane as 2.0 as it appears in cameras.py hardcoded from specific totems image (CAVEAT)
+
+    near_plane: float = 2.0
     """How far along the ray to start sampling."""
     far_plane: float = 1000.0
     """How far along the ray to stop sampling."""
