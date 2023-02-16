@@ -263,8 +263,9 @@ def get_refracted_ray_numpy(S1, N, n1, n2):
             the refracted ray direction, array size (N, 3)
     '''
     try:
-        return n1 / n2 * np.cross(N, np.cross(-N, S1)) - N * np.sqrt(
-            1 - n1 ** 2 / n2 ** 2 * np.sum(np.cross(N, S1) * np.cross(N, S1), axis=1))[:, None]
+        radical = 1 - n1 ** 2 / n2 ** 2 * np.sum(np.cross(N, S1) * np.cross(N, S1), axis=1)
+        numerically_corrected_radical = np.where(radical < -1e-3, 0, radical)
+        return n1 / n2 * np.cross(N, np.cross(-N, S1)) - N * np.sqrt(numerically_corrected_radical)[:, None]
     # Catch bug currently running into related to mismatched shapes of params in np.cross
     except Exception as e:
         import pdb; pdb.set_trace()
