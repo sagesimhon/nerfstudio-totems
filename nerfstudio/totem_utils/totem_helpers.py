@@ -264,7 +264,7 @@ def get_refracted_ray_numpy(S1, N, n1, n2):
     '''
     try:
         radical = 1 - n1 ** 2 / n2 ** 2 * np.sum(np.cross(N, S1) * np.cross(N, S1), axis=1)
-        numerically_corrected_radical = np.where(radical < -1e-3, 0, radical)
+        numerically_corrected_radical = np.where((radical < 0) & (np.absolute(radical) < 1e-3), 0, radical)
         return n1 / n2 * np.cross(N, np.cross(-N, S1)) - N * np.sqrt(numerically_corrected_radical)[:, None]
     # Catch bug currently running into related to mismatched shapes of params in np.cross
     except Exception as e:
