@@ -782,7 +782,7 @@ class Cameras(TensorDataclass):
             np.save('totem_rays_d.npy', totem_rays_o)
 
             totem_rays_o = torch.Tensor(totem_rays_o).to(self.device)
-            totem_rays_d = torch.Tensor(totem_rays_d).to(self.device)
+            totem_rays_d = torch.Tensor(totem_rays_d*[1,-1,1]).to(self.device)
 
             # assert totem_rays_o.shape[0] >= 4096
             # assert totem_rays_d.shape[0] >= 4096
