@@ -53,7 +53,7 @@ class RayGenerator(nn.Module):
         c = ray_indices[:, 0]  # camera indices
         y = ray_indices[:, 1]  # row indices
         x = ray_indices[:, 2]  # col indices
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         #hardcoding for debugging coordiante systems
         # c = torch.Tensor(np.zeros((960*540,), dtype=np.int8))
         # c = torch.Tensor(np.repeat(1, 960*540))
@@ -72,7 +72,7 @@ class RayGenerator(nn.Module):
             coords=coords,
             camera_opt_to_camera=camera_opt_to_camera,
         )
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         reshaped_d = self.reshape_rays_to_image_dimensions(ray_bundle.directions, (960, 540))
         np.save("reshaped_d", reshaped_d.cpu().detach().numpy())
         return ray_bundle
