@@ -15,6 +15,7 @@
 """
 Ray generator.
 """
+import torch
 from torch import nn
 from torchtyping import TensorType
 
@@ -22,6 +23,7 @@ from nerfstudio.cameras.camera_optimizers import CameraOptimizer
 from nerfstudio.cameras.cameras import Cameras
 from nerfstudio.cameras.rays import RayBundle
 
+import numpy as np
 
 class RayGenerator(nn.Module):
     """torch.nn Module for generating rays.
@@ -38,6 +40,10 @@ class RayGenerator(nn.Module):
         self.pose_optimizer = pose_optimizer
         self.image_coords = nn.Parameter(cameras.get_image_coords(), requires_grad=False)
 
+    def reshape_rays_to_image_dimensions(self, ray_d, dims):
+        h, w, = dims #960 x 540
+        return torch.reshape(ray_d, (h,w,3))
+
     def forward(self, ray_indices: TensorType["num_rays", 3]) -> RayBundle:
         """Index into the cameras to generate the rays.
 
@@ -47,13 +53,26 @@ class RayGenerator(nn.Module):
         c = ray_indices[:, 0]  # camera indices
         y = ray_indices[:, 1]  # row indices
         x = ray_indices[:, 2]  # col indices
-        coords = self.image_coords[y, x]
+        import pdb; pdb.set_trace()
+        #hardcoding for debugging coordiante systems
+        # c = torch.Tensor(np.zeros((960*540,), dtype=np.int8))
+        # c = torch.Tensor(np.repeat(1, 960*540))
+        c = np.repeat(1, 960*540)
+
+        xx, yy = np.meshgrid(np.arange(0, 540), np.arange(0, 960))
+        xx = np.reshape(xx, (960*540,))
+        yy = np.reshape(yy, (960*540,))
+        coords = self.image_coords[yy, xx] #torch.Size([960*540,2]) (flattened image in row-major order)
 
         camera_opt_to_camera = self.pose_optimizer(c)
 
+        c = torch.Tensor(c)
         ray_bundle = self.cameras.generate_rays(
             camera_indices=c.unsqueeze(-1),
             coords=coords,
             camera_opt_to_camera=camera_opt_to_camera,
         )
+        import pdb; pdb.set_trace()
+        reshaped_d = self.reshape_rays_to_image_dimensions(ray_bundle.directions, (960, 540))
+        np.save("reshaped_d", reshaped_d.cpu().detach().numpy())
         return ray_bundle
