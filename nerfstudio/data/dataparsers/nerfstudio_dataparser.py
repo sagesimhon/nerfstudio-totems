@@ -189,8 +189,10 @@ class Nerfstudio(DataParser):
 
         # Scale poses
         scale_factor = 1.0
+
         if self.config.auto_scale_poses:
-            scale_factor /= torch.max(torch.abs(poses[:, :3, 3]))
+            # scale_factor /= torch.max(torch.abs(poses[:, :3, 3]))
+            scale_factor /= (torch.max(torch.abs(poses[:, :,3])) or 1.0)  ###SAGE_CUSTOM possible bug fix? CAVEAT could this cause problems with training if needs unit cube
 
         poses[:, :3, 3] *= scale_factor * self.config.scale_factor
 
