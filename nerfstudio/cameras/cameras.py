@@ -573,7 +573,7 @@ class Cameras(TensorDataclass):
 
         # Get our image coordinates and image coordinates offset by 1 (offsets used for dx, dy calculations)
         # Also make sure the shapes are correct
-        coord = torch.stack([(x - cx) / fx, -(y - cy) / fy], -1)  # (num_rays, 2)
+        coord = torch.stack([(x - cx) / fx, -(y - cy) / fy], -1)  # (num_rays, 2) #NOTE_TO_SAGE y is being flipped
         coord_x_offset = torch.stack([(x - cx + 1) / fx, -(y - cy) / fy], -1)  # (num_rays, 2)
         coord_y_offset = torch.stack([(x - cx) / fx, -(y - cy + 1) / fy], -1)  # (num_rays, 2)
         assert (
@@ -655,6 +655,8 @@ class Cameras(TensorDataclass):
 
         assert directions_stack.shape == (3,) + num_rays_shape + (3,)
 
+        # TODO intercept rays here before c2w
+        import pdb; pdb.set_trace()
         c2w = self.camera_to_worlds[true_indices]
         assert c2w.shape == num_rays_shape + (3, 4)
 
@@ -672,7 +674,7 @@ class Cameras(TensorDataclass):
         origins = c2w[..., :3, 3]  # (..., 3)
         assert origins.shape == num_rays_shape + (3,)
 
-        directions = directions_stack[0]
+        directions = directions_stack[0] #TODO save rays after this line
         assert directions.shape == num_rays_shape + (3,)
 
         # norms of the vector going between adjacent coords, giving us dx and dy per output ray
