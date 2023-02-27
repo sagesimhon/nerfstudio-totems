@@ -57,12 +57,16 @@ class RayGenerator(nn.Module):
         #hardcoding for debugging coordiante systems
         # c = torch.Tensor(np.zeros((960*540,), dtype=np.int8))
         # c = torch.Tensor(np.repeat(1, 960*540))
+        # c = np.repeat(1, 960*540)
         c = np.repeat(1, 960*540)
 
-        xx, yy = np.meshgrid(np.arange(0, 540), np.arange(0, 960))
+        # xx, yy = np.meshgrid(np.arange(0, 540), np.arange(0, 960))
+        # xx = np.reshape(xx, (960*540,))
+        # yy = np.reshape(yy, (960*540,))
+        xx, yy = np.meshgrid(np.arange(0, 960), np.arange(0, 540))
         xx = np.reshape(xx, (960*540,))
         yy = np.reshape(yy, (960*540,))
-        coords = self.image_coords[yy, xx] #torch.Size([960*540,2]) (flattened image in row-major order)
+        coords = self.image_coords[yy, xx] #torch.Size([5760*3840,2]) (flattened image in row-major order)
 
         camera_opt_to_camera = self.pose_optimizer(c)
 
@@ -72,7 +76,8 @@ class RayGenerator(nn.Module):
             coords=coords,
             camera_opt_to_camera=camera_opt_to_camera,
         )
-        # import pdb; pdb.set_trace()
-        reshaped_d = self.reshape_rays_to_image_dimensions(ray_bundle.directions, (960, 540))
+        import pdb; pdb.set_trace()
+        # reshaped_d = self.reshape_rays_to_image_dimensions(ray_bundle.directions, (960, 540))
+        reshaped_d = self.reshape_rays_to_image_dimensions(ray_bundle.directions, (540, 960))
         np.save("reshaped_d", reshaped_d.cpu().detach().numpy())
         return ray_bundle
