@@ -4,7 +4,7 @@ What I learned:
 
 Nerfstudio (specifically, the `nerfacto` model) faces challenges in reproducing reconstructions of the unwarped totem rays comparable in quality to the original NeRF implementation due to the large presence of floaters, except for a few higher quality views. 
 
-Additionally, found easily breakable code when modularizing with Nerfstudio and running larger jobs. This revealed the need for future work to develop more robust implementations and integration of these complex, resource-intensive projects and addressing issues discovered in the rendering backend and job manager summarized [here](https://github.com/mitsuba-renderer/mitsuba3/issues/849), [here](https://github.com/mitsuba-renderer/drjit-core/issues/63), and [here](https://github.com/mitsuba-renderer/mitsuba3/issues/190). 
+Additionally, found easily breakable code when modularizing with Nerfstudio and running larger jobs. This revealed the need for future work to develop more robust implementations and integration of these complex, resource-intensive projects and address issues discovered in the rendering backend and job manager summarized [here](https://github.com/mitsuba-renderer/mitsuba3/issues/849), [here](https://github.com/mitsuba-renderer/drjit-core/issues/63), and [here](https://github.com/mitsuba-renderer/mitsuba3/issues/190). 
 
 In light of this and due to the fact that NeRF-based Totems relies on a new optimization for every scene, we ultimately switched to a 2D, generalizable, NeRF-independent, more efficient approach that can be used on any scene within a depth tolerance and with the same totem-camera configuration. This project can be found [here](https://github.com/sagesimhon/totem_plus)
 
