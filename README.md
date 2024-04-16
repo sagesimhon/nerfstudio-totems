@@ -2,7 +2,7 @@ As part of my Master’s thesis, an integration of [Totems](https://jingweim.git
 
 What I learned: 
 
-Nerfstudio (specifically, the `nerfacto` model) faces challenges in reproducing reconstructions of the unwarped totem rays comparable in quality to the original NeRF implementation due to the large presence of floaters, except for a few views. 
+Nerfstudio (specifically, the `nerfacto` model) faces challenges in reproducing reconstructions of the unwarped totem rays comparable in quality to the original NeRF implementation due to the large presence of floaters, except for a few higher quality views. 
 
 Additionally, found easily breakable code when modularizing with Nerfstudio and running larger jobs. This revealed the need for future work to develop more robust implementations and integration of these complex, resource-intensive projects and addressing issues discovered in the rendering backend and job manager summarized [here](https://github.com/mitsuba-renderer/mitsuba3/issues/849), [here](https://github.com/mitsuba-renderer/drjit-core/issues/63), and [here](https://github.com/mitsuba-renderer/mitsuba3/issues/190). 
 
